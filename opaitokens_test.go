@@ -13,4 +13,7 @@ func TestUserCase(t *testing.T) {
 	token := tokens.FetchToken()
 	fmt.Printf("token info: %v\n", token)
 
+	token = tokens.RefreshToken()
+	fmt.Println("token info again: %v\n", token)
+
 }
