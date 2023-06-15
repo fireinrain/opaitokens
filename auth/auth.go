@@ -22,6 +22,7 @@ type Auth0 struct {
 	sessionToken string
 	email        string
 	password     string
+	mfa          string
 	useCache     bool
 	session      *http.Client
 	reqHeaders   http.Header
@@ -32,7 +33,7 @@ type Auth0 struct {
 	authForCode  bool
 }
 
-func NewAuth0(email, password string, useCache bool) *Auth0 {
+func NewAuth0(email, password string, mfa string, useCache bool) *Auth0 {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		Proxy:           http.ProxyFromEnvironment,
@@ -42,6 +43,7 @@ func NewAuth0(email, password string, useCache bool) *Auth0 {
 		sessionToken: "",
 		email:        email,
 		password:     password,
+		mfa:          mfa,
 		useCache:     useCache,
 		session: &http.Client{
 			Timeout:   time.Second * 100,
@@ -253,12 +255,76 @@ func (a *Auth0) partSix(codeVerifier, location, urlStr string) (string, error) {
 
 	if resp.StatusCode == http.StatusFound {
 		location := resp.Header.Get("Location")
+		if strings.HasPrefix(location, "/u/mfa-otp-challenge?") {
+			if a.mfa == "" {
+				return "", fmt.Errorf("mfa string not found")
+			}
+			return a.partSeven(codeVerifier, location)
+		}
 		if !strings.HasPrefix(location, "com.openai.chat://auth0.openai.com/ios/com.openai.chat/callback?") {
 			return "", fmt.Errorf("login callback failed")
 		}
 		return a.getAccessToken(codeVerifier, resp.Header.Get("Location"))
 	}
 	return "", errors.New("error logging in")
+}
+
+func (a *Auth0) partSeven(codeVerifier string, location string) (string, error) {
+	urlStr := "https://auth0.openai.com" + location
+	headers := http.Header{}
+	headers.Set("User-Agent", a.userAgent)
+	headers.Set("Referer", urlStr)
+	headers.Set("Origin", "https://auth0.openai.com")
+
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return "", fmt.Errorf("error parsing url: %v", err)
+	}
+
+	// Get the raw query
+	rawQuery := u.RawQuery
+	urlParams, err := url.ParseQuery(rawQuery)
+	if err != nil {
+		return "", fmt.Errorf("error parsing url query: %v", err)
+	}
+
+	state := urlParams.Get("state")
+	if state == "" {
+		return "", errors.New("state parameter not found")
+	}
+	data := url.Values{
+		"state":  {state},
+		"code":   {a.mfa},
+		"action": {"default"},
+	}
+
+	req, err := http.NewRequest("POST", urlStr, strings.NewReader(data.Encode()))
+	if err != nil {
+		return "", fmt.Errorf("error creating request: %v", err)
+	}
+	req.Header = headers
+	a.session.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+
+	resp, err := a.session.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("error logging in: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusFound {
+		location := resp.Header.Get("Location")
+		if !strings.HasPrefix(location, "/authorize/resume?") {
+			return "", errors.New("login with mfa callback failed")
+		}
+		return a.partSix(codeVerifier, location, urlStr)
+	}
+	if resp.StatusCode == http.StatusBadRequest {
+		return "", errors.New("wrong mfa code for login")
+	}
+	return "", errors.New("login failed with wrong email or password")
+
 }
 
 func (a *Auth0) getAccessToken(codeVerifier, callbackURL string) (string, error) {

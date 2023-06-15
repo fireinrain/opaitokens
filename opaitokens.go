@@ -17,6 +17,7 @@ const OpenaiTokenBaseUrl = "https://auth0.openai.com/oauth/token"
 type OpaiTokens struct {
 	Email          string                     `json:"email"`
 	Password       string                     `json:"password"`
+	MFA            string                     `json:"mfa"`
 	OpenaiToken    model.OpenaiToken          `json:"openaiToken"`
 	RefreshedToken model.OpenaiRefreshedToken `json:"refreshedToken"`
 }
@@ -31,13 +32,33 @@ func NewOpaiTokens(email string, password string) *OpaiTokens {
 	return &OpaiTokens{
 		Email:          email,
 		Password:       password,
+		MFA:            "",
+		OpenaiToken:    model.OpenaiToken{},
+		RefreshedToken: model.OpenaiRefreshedToken{},
+	}
+}
+
+func NewOpaiTokensWithMFA(email string, password string, mfa string) *OpaiTokens {
+	if email == "" {
+		log.Fatal("email cannot be empty")
+	}
+	if password == "" {
+		log.Fatal("password cannot be empty")
+	}
+	if mfa == "" {
+		log.Fatal("mfa cannot be empty")
+	}
+	return &OpaiTokens{
+		Email:          email,
+		Password:       password,
+		MFA:            mfa,
 		OpenaiToken:    model.OpenaiToken{},
 		RefreshedToken: model.OpenaiRefreshedToken{},
 	}
 }
 
 func (receiver *OpaiTokens) FetchToken() *OpaiTokens {
-	auth := auth.NewAuth0(receiver.Email, receiver.Password, false)
+	auth := auth.NewAuth0(receiver.Email, receiver.Password, receiver.MFA, false)
 	codeAndUrl, err := auth.AuthForCodeUrl()
 	if err != nil {
 		fmt.Println("Error:", err)
