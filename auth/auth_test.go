@@ -10,7 +10,7 @@ func TestAuthForToken(t *testing.T) {
 	password := "xxxx"
 	useCache := false
 
-	auth := NewAuth0(email, password, useCache)
+	auth := NewAuth0(email, password, "", useCache)
 	accessToken, err := auth.Auth(true)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -25,7 +25,7 @@ func TestAuthForTokenByProxy(t *testing.T) {
 	password := "xxxx"
 	useCache := false
 
-	auth := NewAuth0(email, password, useCache)
+	auth := NewAuth0(email, password, "", useCache)
 	accessToken, err := auth.Auth(false)
 	if err != nil {
 		fmt.Println("Error:", err)
