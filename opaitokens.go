@@ -177,6 +177,11 @@ type OpenaiAccount struct {
 	MFA      string `json:"mfa"`
 }
 
+type RenewResult struct {
+	RenewCount   int  `json:"renew_count"`
+	RenewSuccess bool `json:"renew_success"`
+}
+
 // FetchSharedToken
 //
 //	@Description: 通过官方账号获取shared token
@@ -208,6 +213,39 @@ func (receiver *FakeOpenTokens) FetchSharedToken(openaiAccount OpenaiAccount, un
 		return shareToken, errors.New("error getting shared token: " + err.Error())
 	}
 	return shareToken, nil
+}
+
+// RenewSharedToken
+// shared token = hash(unique_name + access token uid)
+//
+//	@Description: 刷新所有账号的fk(在14天到期之前主动刷新账号池的fk来确保pk保持不变)
+//	@receiver receiver
+//	@param openaiAccounts
+//	@return RenewResult
+//	@return error
+func (receiver *FakeOpenTokens) RenewSharedToken(openaiAccounts []OpenaiAccount) (RenewResult, error) {
+	result := RenewResult{
+		RenewCount:   0,
+		RenewSuccess: false,
+	}
+	if len(openaiAccounts) <= 0 {
+		log.Fatal("openai account is empty")
+	}
+	var er error
+	for _, account := range openaiAccounts {
+		_, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
+		if err == nil {
+			result.RenewCount += 1
+		} else {
+			er = err
+		}
+		time.Sleep(time.Second * 15)
+	}
+	//全部成功刷新
+	if len(openaiAccounts) == result.RenewCount {
+		result.RenewSuccess = true
+	}
+	return result, er
 }
 
 // FetchPooledToken
