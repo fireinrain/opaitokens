@@ -87,10 +87,10 @@ fmt.Println(token)
 //主动在14天之内刷新所有账号的shared token 来确保pooled token有效
 //可以使用
 var accounts []OpenaiAccount
-account := OpenaiAccount{
-Email:    "xxxx@gmail.com",
-Password: "xx@xx",
-MFA:      "",
+    account := OpenaiAccount{
+    Email:    "xxxx@gmail.com",
+    Password: "xx@xx",
+    MFA:      "",
 }
 accounts = append(accounts, account)
 tokens := FakeOpenTokens{}
