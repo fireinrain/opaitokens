@@ -245,7 +245,8 @@ func (receiver *FakeOpenTokens) RenewSharedToken(openaiAccounts []OpenaiAccount)
 		log.Fatal("openai account is empty")
 	}
 	var er error
-	for _, account := range openaiAccounts {
+	for index, account := range openaiAccounts {
+		fmt.Printf("renew shared token progress...%v/%v", index+1, len(openaiAccounts))
 		_, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
 		if err == nil {
 			result.RenewCount += 1
