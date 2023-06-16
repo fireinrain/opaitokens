@@ -192,7 +192,8 @@ func (receiver *FakeOpenTokens) FetchSharedToken(openaiAccount OpenaiAccount, un
 	//fmt.Printf("token info: %v\n", token)
 	accessToken := token.OpenaiToken.AccessToken
 	// use the access token
-	fmt.Printf("get the access token: %v \n", accessToken)
+	fmt.Println("current account: ", openaiAccount.Email)
+	fmt.Printf("fetched access token: %v \n", accessToken)
 
 	platform := fakeopen.AiFakeOpenPlatform{}
 	req := fakeopen.SharedTokenReq{
