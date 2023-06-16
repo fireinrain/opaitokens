@@ -3,6 +3,21 @@ A golang lib to help you to get openai access token and refresh the token
 
 # How to use?
 
+## if you cant visit openai freely, then you need set HTTP_PROXY and HTTPS_PROXY env before use.
+```bash
+unix/linux/macos
+
+export http_proxy=http://proxy.example.com:port
+export https_proxy=http://proxy.example.com:port
+
+windows
+
+set http_proxy=http://proxy.example.com:port
+set https_proxy=http://proxy.example.com:port
+
+
+```
+
 ## official account
 ```go
 email := "xxxx@xx.com"
