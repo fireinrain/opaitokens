@@ -49,38 +49,36 @@ fmt.Println("i am using refresh token: ", accessToken)
 ```go
 
 
-platform := AiFakeOpenPlatform{}
-req := SharedTokenReq{
-    UniqueName:        "abcdxxxxxx",
-    AccessToken:       "",
-    ExpiresIn:         0,
-    SiteLimit:         "",
-    ShowConversations: false,
+tokens := FakeOpenTokens{}
+account := OpenaiAccount{
+Email:    "xxxx@gmail.com",
+Password: "xx@xx",
+MFA:      "",
 }
-token, err := platform.GetSharedToken(req)
+token, err := tokens.FetchSharedToken(account, "fireinrain")
 if err != nil {
-    fmt.Printf("error getting shared token: %v\n", err)
+fmt.Println("error: ", err)
 }
-fmt.Println("Shared token: ",token)
+fmt.Println(token.TokenKey)
 ```
 
 
 ## use pooled token with ai.fakenopen.com
 
 ```go
-platform := AiFakeOpenPlatform{}
-//tokens with shared token
-fk := []string{"abc"}
-req := PooledTokenReq{
-    ShareTokens: fk,
-    PoolToken:   "",
+var accounts []OpenaiAccount
+account := OpenaiAccount{
+Email:    "xxxx@gmail.com",
+Password: "xx@xx",
+MFA:      "",
 }
-token, err := platform.RenewPooledToken(req)
+accounts = append(accounts, account)
+tokens := FakeOpenTokens{}
+token, err := tokens.FetchPooledToken(accounts)
 if err != nil {
-    fmt.Printf("error renewing pool token: %v\n",err)
+fmt.Println("error: ", err)
 }
-fmt.Println("Pooled token: ",token)
-
+fmt.Println(token)
 
 ```
 

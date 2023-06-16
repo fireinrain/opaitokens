@@ -3,8 +3,10 @@ package opaitokens
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/fireinrain/opaitokens/auth"
+	"github.com/fireinrain/opaitokens/fakeopen"
 	"github.com/fireinrain/opaitokens/model"
 	"log"
 	"net/http"
@@ -13,6 +15,8 @@ import (
 )
 
 const OpenaiTokenBaseUrl = "https://auth0.openai.com/oauth/token"
+
+const SharedTokenUniqueName = "fireinrain"
 
 type OpaiTokens struct {
 	Email          string                     `json:"email"`
@@ -39,22 +43,9 @@ func NewOpaiTokens(email string, password string) *OpaiTokens {
 }
 
 func NewOpaiTokensWithMFA(email string, password string, mfa string) *OpaiTokens {
-	if email == "" {
-		log.Fatal("email cannot be empty")
-	}
-	if password == "" {
-		log.Fatal("password cannot be empty")
-	}
-	if mfa == "" {
-		log.Fatal("mfa cannot be empty")
-	}
-	return &OpaiTokens{
-		Email:          email,
-		Password:       password,
-		MFA:            mfa,
-		OpenaiToken:    model.OpenaiToken{},
-		RefreshedToken: model.OpenaiRefreshedToken{},
-	}
+	tokens := NewOpaiTokens(email, password)
+	tokens.MFA = mfa
+	return tokens
 }
 
 func (receiver *OpaiTokens) FetchToken() *OpaiTokens {
@@ -175,4 +166,85 @@ func getLoginUrl(codeChallenge string) string {
 	//fmt.Println("Modified URL:", newURL)
 	//fmt.Println(escape)
 	return newURL
+}
+
+type FakeOpenTokens struct{}
+
+type OpenaiAccount struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	MFA      string `json:"mfa"`
+}
+
+// FetchSharedToken
+//
+//	@Description: 通过官方账号获取shared token
+//	@receiver receiver
+//	@param openaiAccount
+//	@param uniqueName
+//	@return fakeopen.SharedToken
+//	@return error
+func (receiver *FakeOpenTokens) FetchSharedToken(openaiAccount OpenaiAccount, uniqueName string) (fakeopen.SharedToken, error) {
+
+	tokens := NewOpaiTokensWithMFA(openaiAccount.Email, openaiAccount.Password, openaiAccount.MFA)
+	token := tokens.FetchToken()
+	//fmt.Printf("token info: %v\n", token)
+	accessToken := token.OpenaiToken.AccessToken
+	// use the access token
+	fmt.Printf("get the access token: %v \n", accessToken)
+
+	platform := fakeopen.AiFakeOpenPlatform{}
+	req := fakeopen.SharedTokenReq{
+		UniqueName:        uniqueName,
+		AccessToken:       accessToken,
+		ExpiresIn:         0,
+		SiteLimit:         "",
+		ShowConversations: true,
+	}
+	shareToken, err := platform.GetSharedToken(req)
+	if err != nil {
+		return shareToken, errors.New("error getting shared token: " + err.Error())
+	}
+	return shareToken, nil
+}
+
+// FetchPooledToken
+//
+//	@Description: 通过官方账号列表获取pooled token
+//	@receiver receiver
+//	@param openaiAccounts
+//	@return fakeopen.PooledToken
+//	@return error
+func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount) (fakeopen.PooledToken, error) {
+	if len(openaiAccounts) <= 0 {
+		log.Fatal("invalid openai account list")
+	}
+	if len(openaiAccounts) >= 20 {
+		log.Println("openai account size is greater than 20,do cut off to 20")
+	}
+	var shareTokens []string
+	for index, account := range openaiAccounts {
+		if index > 19 {
+			break
+		}
+		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
+		if err != nil {
+			return fakeopen.PooledToken{}, errors.New("error fetch shared token: " + err.Error())
+		}
+		shareTokens = append(shareTokens, token.TokenKey)
+
+	}
+
+	platform := fakeopen.AiFakeOpenPlatform{}
+	//tokens with shared token
+
+	req := fakeopen.PooledTokenReq{
+		ShareTokens: shareTokens,
+		PoolToken:   "",
+	}
+	token, err := platform.RenewPooledToken(req)
+	if err != nil {
+		return token, errors.New("error renewing pool token: " + err.Error())
+	}
+	return token, nil
 }

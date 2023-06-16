@@ -42,3 +42,33 @@ func TestNewOpaiTokensWithMFA(t *testing.T) {
 	//use the refresh token
 	fmt.Println("i am using refresh token: ", accessToken)
 }
+
+func TestFakeOpenTokens_FetchSharedToken(t *testing.T) {
+	tokens := FakeOpenTokens{}
+	account := OpenaiAccount{
+		Email:    "xxxx@gmail.com",
+		Password: "xx@xx",
+		MFA:      "",
+	}
+	token, err := tokens.FetchSharedToken(account, "fireinrain")
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+	fmt.Println(token.TokenKey)
+}
+
+func TestFakeOpenTokens_FetchPooledToken(t *testing.T) {
+	var accounts []OpenaiAccount
+	account := OpenaiAccount{
+		Email:    "xxxx@gmail.com",
+		Password: "xx@xx",
+		MFA:      "",
+	}
+	accounts = append(accounts, account)
+	tokens := FakeOpenTokens{}
+	token, err := tokens.FetchPooledToken(accounts)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+	fmt.Println(token)
+}
