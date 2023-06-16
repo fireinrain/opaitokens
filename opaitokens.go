@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 const OpenaiTokenBaseUrl = "https://auth0.openai.com/oauth/token"
@@ -228,6 +229,8 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 			break
 		}
 		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
+		//等待15秒
+		time.Sleep(15 * time.Second)
 		if err != nil {
 			return fakeopen.PooledToken{}, errors.New("error fetch shared token: " + err.Error())
 		}
