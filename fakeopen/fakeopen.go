@@ -1,13 +1,16 @@
 package fakeopen
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // wrap ai.fakeopen.com api
@@ -17,7 +20,27 @@ import (
 const SharedTokenRegisterUrl = "https://ai.fakeopen.com/token/register"
 const PooledTokenRegisterUrl = "https://ai.fakeopen.com/pool/update"
 
-type AiFakeOpenPlatform struct{}
+var jar, _ = cookiejar.New(nil)
+
+type AiFakeOpenPlatform struct {
+	Client *http.Client
+}
+
+func NewAiFakeOpenPlatform() *AiFakeOpenPlatform {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Proxy:           http.ProxyFromEnvironment,
+	}
+	client := &http.Client{
+		Timeout:   time.Second * 100,
+		Transport: tr,
+		Jar:       jar,
+	}
+	platform := &AiFakeOpenPlatform{
+		Client: client,
+	}
+	return platform
+}
 
 type SharedTokenReq struct {
 	//唯一表示
@@ -64,7 +87,7 @@ func (f *AiFakeOpenPlatform) GetSharedToken(shareTokenReq SharedTokenReq) (Share
 	formValues.Set("show_conversations", strconv.FormatBool(shareTokenReq.ShowConversations))
 
 	// Send the form data as a POST request
-	resp, err := http.PostForm(SharedTokenRegisterUrl, formValues)
+	resp, err := f.Client.PostForm(SharedTokenRegisterUrl, formValues)
 	if err != nil {
 		return token, errors.New("get shared token failed: " + err.Error())
 	}
@@ -130,7 +153,7 @@ func (f *AiFakeOpenPlatform) RenewPooledToken(pooledTokenReq PooledTokenReq) (Po
 	formValues.Set("pool_token", pooledTokenReq.PoolToken)
 
 	// Send the form data as a POST request
-	resp, err := http.PostForm(PooledTokenRegisterUrl, formValues)
+	resp, err := f.Client.PostForm(PooledTokenRegisterUrl, formValues)
 	if err != nil {
 		return pToken, errors.New("get pooled token failed: " + err.Error())
 	}

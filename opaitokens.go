@@ -2,6 +2,7 @@ package opaitokens
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"github.com/fireinrain/opaitokens/model"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"regexp"
 	"strings"
 	"time"
@@ -137,6 +139,17 @@ func (reciver *OpaiTokens) refreshToken(refreshToken string) (model.OpenaiRefres
 }
 
 func makePostRequest(url string, jsonData []byte) (resp string, error error) {
+	var jar, _ = cookiejar.New(nil)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Proxy:           http.ProxyFromEnvironment,
+	}
+	client := &http.Client{
+		Timeout:   time.Second * 100,
+		Transport: tr,
+		Jar:       jar,
+	}
 	// 创建请求
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -147,7 +160,7 @@ func makePostRequest(url string, jsonData []byte) (resp string, error error) {
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36")
 	// 发送请求
-	response, err := http.DefaultClient.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("POST request error:", err)
 		return "", err
@@ -200,7 +213,7 @@ func (receiver *FakeOpenTokens) FetchSharedToken(openaiAccount OpenaiAccount, un
 	fmt.Println("current account: ", openaiAccount.Email)
 	fmt.Printf("fetched access token: %v \n", accessToken)
 
-	platform := fakeopen.AiFakeOpenPlatform{}
+	platform := fakeopen.NewAiFakeOpenPlatform()
 	req := fakeopen.SharedTokenReq{
 		UniqueName:        uniqueName,
 		AccessToken:       accessToken,
@@ -278,7 +291,7 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 
 	}
 
-	platform := fakeopen.AiFakeOpenPlatform{}
+	platform := fakeopen.NewAiFakeOpenPlatform()
 	//tokens with shared token
 
 	req := fakeopen.PooledTokenReq{
