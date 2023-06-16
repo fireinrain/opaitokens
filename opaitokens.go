@@ -219,7 +219,7 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 	if len(openaiAccounts) <= 0 {
 		log.Fatal("invalid openai account list")
 	}
-	if len(openaiAccounts) >= 20 {
+	if len(openaiAccounts) > 20 {
 		log.Println("openai account size is greater than 20,do cut off to 20")
 	}
 	var shareTokens []string
