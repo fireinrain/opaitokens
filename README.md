@@ -2,6 +2,8 @@
 A golang lib to help you to get openai access token and refresh the token
 
 # How to use?
+
+## official account
 ```go
 email := "xxxx@xx.com"
 password := "xxxxx"
@@ -19,6 +21,11 @@ accessToken = token.RefreshedToken.AccessToken
 //use the refresh token
 fmt.Println("i am using refresh token: ", accessToken)
 
+```
+
+## official account with MFA
+
+```go
 // if you have set MFA to the account, then use this below
 email := "xxxx@xx.com"
 password := "xxxxx"
@@ -37,5 +44,43 @@ accessToken = token.RefreshedToken.AccessToken
 //use the refresh token
 fmt.Println("i am using refresh token: ", accessToken)
 
+```
+## use share token with ai.fakenopen.com 
+```go
+
+
+platform := AiFakeOpenPlatform{}
+req := SharedTokenReq{
+    UniqueName:        "abcdxxxxxx",
+    AccessToken:       "",
+    ExpiresIn:         0,
+    SiteLimit:         "",
+    ShowConversations: false,
+}
+token, err := platform.GetSharedToken(req)
+if err != nil {
+    fmt.Printf("error getting shared token: %v\n", err)
+}
+fmt.Println("Shared token: ",token)
+```
+
+
+## use pooled token with ai.fakenopen.com
+
+```go
+platform := AiFakeOpenPlatform{}
+//tokens with shared token
+fk := []string{"abc"}
+req := PooledTokenReq{
+    ShareTokens: fk,
+    PoolToken:   "",
+}
+token, err := platform.RenewPooledToken(req)
+if err != nil {
+    fmt.Printf("error renewing pool token: %v\n",err)
+}
+fmt.Println("Pooled token: ",token)
+
 
 ```
+
