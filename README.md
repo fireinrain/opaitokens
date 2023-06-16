@@ -51,13 +51,13 @@ fmt.Println("i am using refresh token: ", accessToken)
 
 tokens := FakeOpenTokens{}
 account := OpenaiAccount{
-Email:    "xxxx@gmail.com",
-Password: "xx@xx",
-MFA:      "",
+    Email:    "xxxx@gmail.com",
+    Password: "xx@xx",
+    MFA:      "",
 }
 token, err := tokens.FetchSharedToken(account, "fireinrain")
 if err != nil {
-fmt.Println("error: ", err)
+    fmt.Println("error: ", err)
 }
 fmt.Println(token.TokenKey)
 ```
@@ -68,15 +68,15 @@ fmt.Println(token.TokenKey)
 ```go
 var accounts []OpenaiAccount
 account := OpenaiAccount{
-Email:    "xxxx@gmail.com",
-Password: "xx@xx",
-MFA:      "",
+    Email:    "xxxx@gmail.com",
+    Password: "xx@xx",
+    MFA:      "",
 }
 accounts = append(accounts, account)
 tokens := FakeOpenTokens{}
 token, err := tokens.FetchPooledToken(accounts)
 if err != nil {
-fmt.Println("error: ", err)
+    fmt.Println("error: ", err)
 }
 fmt.Println(token)
 
