@@ -226,7 +226,7 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 	}
 	var shareTokens []string
 	for index, account := range openaiAccounts {
-		if index > 19 {
+		if index > 20 {
 			break
 		}
 		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
