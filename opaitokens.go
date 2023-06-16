@@ -210,7 +210,7 @@ func (receiver *FakeOpenTokens) FetchSharedToken(openaiAccount OpenaiAccount, un
 	//fmt.Printf("token info: %v\n", token)
 	accessToken := token.OpenaiToken.AccessToken
 	// use the access token
-	fmt.Println("current account: ", openaiAccount.Email)
+	fmt.Println("current openai account: ", openaiAccount.Email)
 	fmt.Printf("fetched access token: %v \n", accessToken)
 
 	platform := fakeopen.NewAiFakeOpenPlatform()
@@ -280,6 +280,7 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 		if index > 20 {
 			break
 		}
+		fmt.Printf("fetching pooled token progress...%v/%v", index+1, len(openaiAccounts))
 		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
 		//等待15秒
 		if err != nil {
