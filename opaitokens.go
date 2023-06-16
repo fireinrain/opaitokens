@@ -246,7 +246,7 @@ func (receiver *FakeOpenTokens) RenewSharedToken(openaiAccounts []OpenaiAccount)
 	}
 	var er error
 	for index, account := range openaiAccounts {
-		fmt.Printf("renew shared token progress...%v/%v", index+1, len(openaiAccounts))
+		fmt.Printf("renew shared token progress...%v/%v. ", index+1, len(openaiAccounts))
 		_, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
 		if err == nil {
 			result.RenewCount += 1
@@ -281,7 +281,7 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 		if index > 20 {
 			break
 		}
-		fmt.Printf("fetching pooled token progress...%v/%v", index+1, len(openaiAccounts))
+		fmt.Printf("fetching pooled token progress...%v/%v. ", index+1, len(openaiAccounts))
 		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
 		//等待15秒
 		if err != nil {
