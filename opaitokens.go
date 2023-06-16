@@ -231,7 +231,8 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
 		//等待15秒
 		if err != nil {
-			return fakeopen.PooledToken{}, errors.New("error fetch shared token: " + err.Error())
+			log.Printf("error fetch shared token: %v \n", err)
+			log.Println("current account is: ", account.Email)
 		}
 		shareTokens = append(shareTokens, token.TokenKey)
 		time.Sleep(15 * time.Second)
