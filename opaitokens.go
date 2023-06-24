@@ -21,6 +21,8 @@ const OpenaiTokenBaseUrl = "https://auth0.openai.com/oauth/token"
 
 const SharedTokenUniqueName = "fireinrain"
 
+const PooledTokenAccountsLimit = 100
+
 type OpaiTokens struct {
 	Email          string                     `json:"email"`
 	Password       string                     `json:"password"`
@@ -273,12 +275,12 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 	if len(openaiAccounts) <= 0 {
 		log.Fatal("invalid openai account list")
 	}
-	if len(openaiAccounts) > 20 {
-		log.Println("openai account size is greater than 20,do cut off to 20")
+	if len(openaiAccounts) > PooledTokenAccountsLimit {
+		log.Println("openai account size is greater than 100,do cut off to 100")
 	}
 	var shareTokens []string
 	for index, account := range openaiAccounts {
-		if index > 20 {
+		if index > PooledTokenAccountsLimit {
 			break
 		}
 		fmt.Printf("fetching pooled token progress...%v/%v. ", index+1, len(openaiAccounts))

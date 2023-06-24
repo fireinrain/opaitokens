@@ -19,6 +19,7 @@ import (
 
 const SharedTokenRegisterUrl = "https://ai.fakeopen.com/token/register"
 const PooledTokenRegisterUrl = "https://ai.fakeopen.com/pool/update"
+const PooledTokensLimit = 100
 
 var jar, _ = cookiejar.New(nil)
 
@@ -143,8 +144,8 @@ type PooledToken struct {
 //	@return error
 func (f *AiFakeOpenPlatform) RenewPooledToken(pooledTokenReq PooledTokenReq) (PooledToken, error) {
 	pToken := PooledToken{}
-	if len(pooledTokenReq.ShareTokens) > 20 || len(pooledTokenReq.ShareTokens) == 0 {
-		return pToken, errors.New("invalid share tokens, it must be less than 20 but greater than 0")
+	if len(pooledTokenReq.ShareTokens) > PooledTokensLimit || len(pooledTokenReq.ShareTokens) == 0 {
+		return pToken, errors.New("invalid share tokens, it must be less than 100 but greater than 0")
 	}
 
 	formValues := url.Values{}
