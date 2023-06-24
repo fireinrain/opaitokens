@@ -117,3 +117,25 @@ fmt.Println(renewResult)
 
 ```
 
+## fetch pooled token with official accounts and offline sk keys
+```go
+var accounts []OpenaiAccount
+account := OpenaiAccount{
+    Email:    "xxxx@gmail.com",
+    Password: "xx@xx",
+    MFA:      "",
+}
+accounts = append(accounts, account)
+	
+var skKeys []string
+skKeys = append(skKeys,"sk-xxxxxx")
+tokens := FakeOpenTokens{}
+token, err := tokens.FetchMixedPooledToken(accounts,skKeys)
+if err != nil {
+    fmt.Println("error: ", err)
+}
+fmt.Println(token)
+
+
+```
+

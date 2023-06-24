@@ -308,3 +308,44 @@ func (receiver *FakeOpenTokens) FetchPooledToken(openaiAccounts []OpenaiAccount)
 	}
 	return token, nil
 }
+
+func (receiver *FakeOpenTokens) FetchMixedPooledToken(openaiAccounts []OpenaiAccount, openaiSkKeys []string) (fakeopen.PooledToken, error) {
+	if len(openaiAccounts)+len(openaiSkKeys) <= 0 {
+		log.Fatal("invalid openai account list or sk keys")
+	}
+	if len(openaiAccounts)+len(openaiSkKeys) > PooledTokenAccountsLimit {
+		log.Println("openai account + openai sk keys size is greater than 100,do cut off to 100")
+	}
+	var shareTokens []string
+	for index, account := range openaiAccounts {
+		if index > PooledTokenAccountsLimit-len(openaiSkKeys) {
+			break
+		}
+		fmt.Printf("fetching pooled token progress...%v/%v. ", index+1, len(openaiAccounts))
+		token, err := receiver.FetchSharedToken(account, SharedTokenUniqueName)
+		//等待15秒
+		if err != nil {
+			log.Printf("error fetch shared token: %v \n", err)
+			log.Println("current account is: ", account.Email)
+		}
+		shareTokens = append(shareTokens, token.TokenKey)
+		time.Sleep(15 * time.Second)
+
+	}
+
+	//add sk keys to shareTokens
+	shareTokens = append(shareTokens, openaiSkKeys...)
+
+	platform := fakeopen.NewAiFakeOpenPlatform()
+	//tokens with shared token
+
+	req := fakeopen.PooledTokenReq{
+		ShareTokens: shareTokens,
+		PoolToken:   "",
+	}
+	token, err := platform.RenewPooledToken(req)
+	if err != nil {
+		return token, errors.New("error renewing pool token: " + err.Error())
+	}
+	return token, nil
+}

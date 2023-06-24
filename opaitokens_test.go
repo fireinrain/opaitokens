@@ -72,3 +72,22 @@ func TestFakeOpenTokens_FetchPooledToken(t *testing.T) {
 	}
 	fmt.Println(token)
 }
+
+func TestFakeOpenTokens_FetchMixedPooledToken(t *testing.T) {
+	var accounts []OpenaiAccount
+	account := OpenaiAccount{
+		Email:    "xxxx@gmail.com",
+		Password: "xx@xx",
+		MFA:      "",
+	}
+	accounts = append(accounts, account)
+
+	var skKeys []string
+	skKeys = append(skKeys, "sk-xxxxxx")
+	tokens := FakeOpenTokens{}
+	token, err := tokens.FetchMixedPooledToken(accounts, skKeys)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+	fmt.Println(token)
+}
