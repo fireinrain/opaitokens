@@ -33,4 +33,5 @@ func TestAuthForTokenByProxy(t *testing.T) {
 	}
 
 	fmt.Println("Access Token:", accessToken)
+	fmt.Println("refresh Token: ", auth.refreshToken)
 }

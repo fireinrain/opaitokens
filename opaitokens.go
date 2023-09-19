@@ -24,14 +24,15 @@ const SharedTokenUniqueName = "fireinrain"
 const PooledTokenAccountsLimit = 100
 
 type OpaiTokens struct {
-	Email          string                     `json:"email"`
-	Password       string                     `json:"password"`
-	MFA            string                     `json:"mfa"`
-	OpenaiToken    model.OpenaiToken          `json:"openaiToken"`
-	RefreshedToken model.OpenaiRefreshedToken `json:"refreshedToken"`
+	Email            string                     `json:"email"`
+	Password         string                     `json:"password"`
+	MFA              string                     `json:"mfa"`
+	OpenaiToken      model.OpenaiToken          `json:"openaiToken"`
+	RefreshedToken   model.OpenaiRefreshedToken `json:"refreshedToken"`
+	UseFakeopenProxy bool                       `json:"useFakeopenProxy"`
 }
 
-func NewOpaiTokens(email string, password string) *OpaiTokens {
+func NewOpaiTokens(email string, password string, useFakeOpenProxy bool) *OpaiTokens {
 	if email == "" {
 		log.Fatal("email cannot be empty")
 	}
@@ -39,22 +40,32 @@ func NewOpaiTokens(email string, password string) *OpaiTokens {
 		log.Fatal("password cannot be empty")
 	}
 	return &OpaiTokens{
-		Email:          email,
-		Password:       password,
-		MFA:            "",
-		OpenaiToken:    model.OpenaiToken{},
-		RefreshedToken: model.OpenaiRefreshedToken{},
+		Email:            email,
+		Password:         password,
+		MFA:              "",
+		OpenaiToken:      model.OpenaiToken{},
+		RefreshedToken:   model.OpenaiRefreshedToken{},
+		UseFakeopenProxy: useFakeOpenProxy,
 	}
 }
 
-func NewOpaiTokensWithMFA(email string, password string, mfa string) *OpaiTokens {
-	tokens := NewOpaiTokens(email, password)
+func NewOpaiTokensWithMFA(email string, password string, mfa string, useFakeOpenProxy bool) *OpaiTokens {
+	tokens := NewOpaiTokens(email, password, useFakeOpenProxy)
 	tokens.MFA = mfa
 	return tokens
 }
 
 func (receiver *OpaiTokens) FetchToken() *OpaiTokens {
 	auth := auth.NewAuth0(receiver.Email, receiver.Password, receiver.MFA, false)
+	if receiver.UseFakeopenProxy {
+		s, err := auth.Auth(false)
+		if err != nil {
+			fmt.Printf("use fakeopen proxy for auth failed: %s", err)
+		}
+		receiver.RefreshedToken.AccessToken = auth.GetRefreshToken()
+		receiver.OpenaiToken.AccessToken = s
+		return receiver
+	}
 	codeAndUrl, err := auth.AuthForCodeUrl()
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -207,7 +218,7 @@ type RenewResult struct {
 //	@return error
 func (receiver *FakeOpenTokens) FetchSharedToken(openaiAccount OpenaiAccount, uniqueName string) (fakeopen.SharedToken, error) {
 
-	tokens := NewOpaiTokensWithMFA(openaiAccount.Email, openaiAccount.Password, openaiAccount.MFA)
+	tokens := NewOpaiTokensWithMFA(openaiAccount.Email, openaiAccount.Password, openaiAccount.MFA, true)
 	token := tokens.FetchToken()
 	//fmt.Printf("token info: %v\n", token)
 	accessToken := token.OpenaiToken.AccessToken

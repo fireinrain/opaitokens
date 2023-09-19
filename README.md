@@ -22,8 +22,9 @@ set https_proxy=http://proxy.example.com:port
 ```go
 email := "xxxx@xx.com"
 password := "xxxxx"
-
-tokens := NewOpaiTokens(email, password)
+//false mean you dont want to use fakeopenproxy to login
+// you can set it as true, so when you dont have a vps for get your access with fakeopen api proxy
+tokens := NewOpaiTokens(email, password, false)
 token := tokens.FetchToken()
 fmt.Printf("token info: %v\n", token)
 accessToken := token.OpenaiToken.AccessToken
@@ -46,7 +47,7 @@ email := "xxxx@xx.com"
 password := "xxxxx"
 mfa := "your mfa code"
 
-tokens := NewOpaiTokensWithMFA(email, password,mfa)
+tokens := NewOpaiTokensWithMFA(email, password,mfa,false)
 token := tokens.FetchToken()
 fmt.Printf("token info: %v\n", token)
 accessToken := token.OpenaiToken.AccessToken

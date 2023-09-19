@@ -9,7 +9,7 @@ func TestUserCase(t *testing.T) {
 	email := "xxxx@xx.com"
 	password := "xxxxx"
 
-	tokens := NewOpaiTokens(email, password)
+	tokens := NewOpaiTokens(email, password, true)
 	token := tokens.FetchToken()
 	fmt.Printf("token info: %v\n", token)
 	accessToken := token.OpenaiToken.AccessToken
@@ -29,7 +29,7 @@ func TestNewOpaiTokensWithMFA(t *testing.T) {
 	password := "xxxxx"
 	mfa := "your mfa code"
 
-	tokens := NewOpaiTokensWithMFA(email, password, mfa)
+	tokens := NewOpaiTokensWithMFA(email, password, mfa, false)
 	token := tokens.FetchToken()
 	fmt.Printf("token info: %v\n", token)
 	accessToken := token.OpenaiToken.AccessToken
