@@ -139,3 +139,9 @@ fmt.Println(token)
 
 ```
 
+## Thanks for Cloudflare Platform.
+![cloudflare](./cf.svg)
+
+You can use cloudflare free cdn to speed your website. And if necessary, choose the pro subscription.
+[Cloudflare](https://www.cloudflare.com/)
+
