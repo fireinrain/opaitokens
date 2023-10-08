@@ -66,7 +66,7 @@ func TestFakeOpenTokens_FetchPooledToken(t *testing.T) {
 	}
 	accounts = append(accounts, account)
 	tokens := FakeOpenTokens{}
-	token, err := tokens.FetchPooledToken(accounts)
+	token, err := tokens.FetchPooledToken(accounts, "fireinrain")
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
@@ -85,9 +85,22 @@ func TestFakeOpenTokens_FetchMixedPooledToken(t *testing.T) {
 	var skKeys []string
 	skKeys = append(skKeys, "sk-xxxxxx")
 	tokens := FakeOpenTokens{}
-	token, err := tokens.FetchMixedPooledToken(accounts, skKeys)
+	token, err := tokens.FetchMixedPooledToken(accounts, skKeys, "fireinrain")
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
 	fmt.Println(token)
+}
+
+func TestFakeOpenTokens_FetchSharedTokenWithRefreshToken(t *testing.T) {
+	openaiAccountEmail := "xxxx@gmail.com"
+	openaiRefreshToken := "xxxxxxxx"
+	uniqueName := "fireinrain"
+	receiver := FakeOpenTokens{}
+	token, err := receiver.FetchSharedTokenWithRefreshToken(openaiAccountEmail, openaiRefreshToken, uniqueName)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+	fmt.Printf("%v\n", token)
+
 }

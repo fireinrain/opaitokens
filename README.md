@@ -140,6 +140,25 @@ fmt.Println(token)
 
 ```
 
+## if you have store the openai refresh token, congratulation! you can use openai official refresh token to get access token and then use in fakeopen fk and pk.
+```go
+func TestFakeOpenTokens_FetchSharedTokenWithRefreshToken(t *testing.T) {
+	openaiAccountEmail := "xxxx@gmail.com"
+	openaiRefreshToken := "xxxxxxxx"
+	uniqueName := "fireinrain"
+	receiver := FakeOpenTokens{}
+	token, err := receiver.FetchSharedTokenWithRefreshToken(openaiAccountEmail, openaiRefreshToken, uniqueName)
+	if err != nil{
+		fmt.Println("error: ", err)
+	}
+	fmt.Printf("%v\n", token)
+
+}
+
+
+```
+Note that every function with suffic "WithRefreshToken" will use openai official refresh token to get access token and then use in fakeopen fk and pk.
+
 ## Thanks for Cloudflare Platform.
 ![cloudflare](./cf.svg)
 
