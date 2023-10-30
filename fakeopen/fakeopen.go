@@ -19,6 +19,7 @@ import (
 
 const SharedTokenRegisterUrl = "https://ai.fakeopen.com/token/register"
 const PooledTokenRegisterUrl = "https://ai.fakeopen.com/pool/update"
+const SessionTokenGenACTUrl = "https://ai.fakeopen.com/auth/session"
 const PooledTokensLimit = 100
 
 var jar, _ = cookiejar.New(nil)
@@ -170,4 +171,38 @@ func (f *AiFakeOpenPlatform) RenewPooledToken(pooledTokenReq PooledTokenReq) (Po
 	}
 	return pToken, nil
 
+}
+
+// SessionToken session token
+// openai 中的session token 可以用来获取accessToken
+// session token有效期为90 天
+type SessionToken struct {
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	SessionToken string `json:"session_token"`
+	TokenType    string `json:"token_type"`
+}
+
+func (f *AiFakeOpenPlatform) GetAccessTokenBySessionToken(sessionTokenFromOpenai string) (SessionToken, error) {
+	sessionToken := SessionToken{}
+	formValues := url.Values{}
+
+	formValues.Set("session_token", sessionTokenFromOpenai)
+
+	// Send the form data as a POST request
+	resp, err := f.Client.PostForm(SessionTokenGenACTUrl, formValues)
+	if err != nil {
+		return sessionToken, errors.New("get access token failed: " + err.Error())
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return sessionToken, errors.New("read response failed: " + err.Error())
+	}
+
+	err = json.Unmarshal(body, &sessionToken)
+	if err != nil {
+		return sessionToken, errors.New("unmarshal response to json failed: " + err.Error())
+	}
+	return sessionToken, nil
 }

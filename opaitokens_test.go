@@ -50,6 +50,7 @@ func TestFakeOpenTokens_FetchSharedToken(t *testing.T) {
 		Password: "xx@xx",
 		MFA:      "",
 	}
+	// 设置自己的uniqueName
 	token, err := tokens.FetchSharedToken(account, "fireinrain")
 	if err != nil {
 		fmt.Println("error: ", err)
@@ -103,4 +104,14 @@ func TestFakeOpenTokens_FetchSharedTokenWithRefreshToken(t *testing.T) {
 	}
 	fmt.Printf("%v\n", token)
 
+}
+
+func TestFakeOpenTokens_FetchAccessTokenBySessionToken(t *testing.T) {
+	receiver := &FakeOpenTokens{}
+	session_token := "xxxxxxxxxxx"
+	token, err := receiver.FetchAccessTokenBySessionToken(session_token)
+	if err != nil {
+		println("error: ", err)
+	}
+	fmt.Println(token.AccessToken)
 }

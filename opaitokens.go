@@ -523,3 +523,16 @@ func (receiver *FakeOpenTokens) FetchMixedPooledTokenWithRefreshToken(renewShare
 	}
 	return token, nil
 }
+
+// FetchAccessTokenBySessionToken
+//
+//	@Description: 使用openai session token 获取accesstoken
+//	session token 有效期三个月
+//	@receiver receiver
+//	@param openaiSessionToken
+//	@return fakeopen.SessionToken
+//	@return error
+func (receiver *FakeOpenTokens) FetchAccessTokenBySessionToken(openaiSessionToken string) (fakeopen.SessionToken, error) {
+	platform := fakeopen.NewAiFakeOpenPlatform()
+	return platform.GetAccessTokenBySessionToken(openaiSessionToken)
+}
