@@ -157,6 +157,22 @@ func TestFakeOpenTokens_FetchSharedTokenWithRefreshToken(t *testing.T) {
 
 
 ```
+
+## if you want to get access token by openai session token, here you are.
+```go
+func TestFakeOpenTokens_FetchAccessTokenBySessionToken(t *testing.T) {
+	receiver := &FakeOpenTokens{}
+	session_token := "xxxxxxxxxxx"
+	token, err := receiver.FetchAccessTokenBySessionToken(session_token)
+	if err != nil {
+		println("error: ", err)
+	}
+	fmt.Println(token.AccessToken)
+}
+
+
+
+```
 Note that every function with suffic "WithRefreshToken" will use openai official refresh token to get access token and then use in fakeopen fk and pk.
 
 ## Thanks for Cloudflare Platform.
