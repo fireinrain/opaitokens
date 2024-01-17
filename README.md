@@ -175,9 +175,8 @@ func TestFakeOpenTokens_FetchAccessTokenBySessionToken(t *testing.T) {
 ```
 Note that every function with suffic "WithRefreshToken" will use openai official refresh token to get access token and then use in fakeopen fk and pk.
 
-## Thanks for Cloudflare Platform.
-![cloudflare](./cf.svg)
-
-You can use cloudflare free cdn to speed your website. And if necessary, choose the pro subscription.
-[Cloudflare](https://www.cloudflare.com/)
+## Thanks for DartNode Platform.
+![DartNode](./dt.jpg)
+Get a free vps for your work, Let's go!
+[DartNode](https://app.dartnode.com/)
 
